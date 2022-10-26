@@ -1,0 +1,5 @@
+export const config = {
+    secret_key:
+      "36463c5b45d384497efcd42da92f5e670d844576289a6c35a1f58a453167e0f75911d2fe6c35cbf03e3528a40dce01e9e40bb1b7496e3954157f3b242b2683bf",
+    };
+  
