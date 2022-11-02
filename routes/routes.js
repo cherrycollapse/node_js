@@ -8,9 +8,23 @@ import { add_user } from "../controllers/userController.js";
 import methodOverride from "method-override";
 import bcrypt from "bcryptjs";
 import { body } from 'express-validator';
+import multer from 'multer';
 
 const __dirname = path.resolve();
 const router = Router();
+
+// Завдання №1. Додати до форми новин можливість завантажити фото (модуль https://github.com/expressjs/multer)
+let newsImgName;
+const storageConfig = multer.diskStorage({
+  destination: (req,file, cb)=>{
+    cb(null,'img');
+  },
+  filename: (req, file, cb)=>{
+    newsImgName = file.originalname;
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+})
+const upload = multer({storage: storageConfig});
 
 router.use(methodOverride("X-HTTP-Method")); //          Microsoft
 router.use(methodOverride("X-HTTP-Method-Override")); // Google/GData
@@ -55,6 +69,7 @@ router.route("/news/add")
         // Додати валідацію для отриманих от клієнта даних (новини). express-validator
         body('title').isLength({ min: 6 }),
         body('text').isLength({ min: 80 }),
+        upload.single('newsImg'),
         (req, res) => {
             const { title, text } = req.body;
 
@@ -68,6 +83,7 @@ router.route("/news/add")
                 id: biggest ? biggest.id + 1 : 1,
                 title: title,
                 text: text,
+                img: "http://localhost:3000/img/" + newsImgName,
             });
             res.redirect("/news")
         });
