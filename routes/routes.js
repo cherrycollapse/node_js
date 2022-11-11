@@ -16,15 +16,15 @@ const router = Router();
 // Завдання №1. Додати до форми новин можливість завантажити фото (модуль https://github.com/expressjs/multer)
 let newsImgName;
 const storageConfig = multer.diskStorage({
-  destination: (req,file, cb)=>{
-    cb(null,'img');
-  },
-  filename: (req, file, cb)=>{
-    newsImgName = file.originalname;
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+    destination: (req, file, cb) => {
+        cb(null, 'img');
+    },
+    filename: (req, file, cb) => {
+        newsImgName = file.originalname;
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
 })
-const upload = multer({storage: storageConfig});
+const upload = multer({ storage: storageConfig });
 
 router.use(methodOverride("X-HTTP-Method")); //          Microsoft
 router.use(methodOverride("X-HTTP-Method-Override")); // Google/GData
@@ -52,6 +52,36 @@ router
     .post((req, res) => {
         res.send("<h1>Express POST REQUEST</h1>");
     });
+
+// Завдання №1. Додати можливість прийняття повідомлень від користувачів (форма зворотнього зв’язку). 
+// Створити роут, на який буде приходити POST запит з тілом повідомлення, та email адреса.
+//  Можна приймати повідомлення як від зареестрованих користувачів, так і від простих users, 
+// в моделі потрібно передбачити збереження id_user, якщо повідомлення надійшло від користувача, який авторізувався.
+router
+    .route("/feedback")
+    .get((req, res, next) => {
+        res.render("feedback.ejs", {
+            title: "Feedback",
+            username: req.signedCookies.username,
+        });
+    })
+    .post((req, res) => {
+        let { email, message } = req.body;   
+
+        let names = users.map(u => u.name);          
+        let auth = names.indexOf(req.cookies.username)   
+
+        if (auth != null) {                                                     
+            console.log("Id: " + users[auth].id + ", " + email + ", " + message) 
+        }
+        else {                       
+            console.log(req.body)
+        }
+
+        res.redirect("/")
+    });
+
+
 
 router.route("/news")
     .get((req, res) => {
